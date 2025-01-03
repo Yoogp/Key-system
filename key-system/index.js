@@ -2,7 +2,7 @@
 app.use(express.static(path.join(__dirname, "public")));
 
 // Handle the /key-generation endpoint (after returning from Linkvertise)
-app.get("/key-generation", (req, res) => {
+app.get("/key-generation.html", (req, res) => {
   // Generate a key when they reach this page
   const key = generateKey();
   const expiryTime = Date.now() + 48 * 60 * 60 * 1000; // 48 hours expiry
