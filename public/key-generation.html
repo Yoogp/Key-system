@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Generation</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .key-box { background-color: #2d2d2d; padding: 20px; margin: 20px auto; display: inline-block; border-radius: 8px; }
+        .key { font-size: 24px; color: #fff; font-weight: bold; }
+        .expiry { font-size: 18px; color: #ff5555; }
+    </style>
+</head>
+<body>
+    <h1>Key Generation</h1>
+    <div class="key-box">
+        <p class="key">Generated Key: <span id="key">Loading...</span></p>
+        <p class="expiry">Expires In: <span id="expiry">48 hours</span></p>
+    </div>
+    <button onclick="generateKey()">Generate New Key</button>
+    <script>
+        // Function to generate a random key
+        function generateKey() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let key = '';
+            for (let i = 0; i < 12; i++) {
+                key += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            const expiryTime = new Date().getTime() + 48 * 60 * 60 * 1000; // 48 hours expiry
+            document.getElementById('key').innerText = key;
+            document.getElementById('expiry').innerText = `Expires at: ${new Date(expiryTime).toLocaleString()}`;
+        }
+    </script>
+</body>
+</html>
