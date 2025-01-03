@@ -56,6 +56,10 @@
             transform: scale(1.1);
             box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
         }
+        button[disabled] {
+            background: gray;
+            cursor: not-allowed;
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -75,41 +79,71 @@
         <h1>Generate Your Key</h1>
         <div class="key-box">
             <p class="key">Generated Key: <span id="key">Loading...</span></p>
-            <p class="expiry">Expires In: <span id="expiry">48 hours</span></p>
+            <p class="expiry">Expires In: <span id="expiry">Loading...</span></p>
         </div>
-        <button onclick="generateKey()">Generate New Key</button>
+        <button id="generate-btn" onclick="generateKey()">Generate New Key</button>
     </div>
     <script>
-        // Generate and display the key
+        function formatTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            return `${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        function loadKey() {
+            const storedKey = localStorage.getItem('generatedKey');
+            const storedExpiry = localStorage.getItem('keyExpiry');
+            const currentTime = new Date().getTime();
+
+            if (storedKey && storedExpiry) {
+                if (currentTime > storedExpiry) {
+                    // Key has expired
+                    localStorage.removeItem('generatedKey');
+                    localStorage.removeItem('keyExpiry');
+                    document.getElementById('key').innerText = "No active key.";
+                    document.getElementById('expiry').innerText = "Generate a new key.";
+                    document.getElementById('generate-btn').disabled = false;
+                } else {
+                    // Key is still valid
+                    document.getElementById('key').innerText = storedKey;
+                    document.getElementById('expiry').innerText = `Expires in: ${formatTime(storedExpiry - currentTime)}`;
+                    document.getElementById('generate-btn').disabled = true;
+                }
+            } else {
+                // No key stored
+                document.getElementById('key').innerText = "No active key.";
+                document.getElementById('expiry').innerText = "Generate a new key.";
+                document.getElementById('generate-btn').disabled = false;
+            }
+        }
+
         function generateKey() {
+            const storedKey = localStorage.getItem('generatedKey');
+            const storedExpiry = localStorage.getItem('keyExpiry');
+            const currentTime = new Date().getTime();
+
+            if (storedKey && storedExpiry && currentTime <= storedExpiry) {
+                alert("You already have an active key. Wait until it expires before generating a new one.");
+                return;
+            }
+
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let key = '';
             for (let i = 0; i < 12; i++) {
                 key += characters.charAt(Math.floor(Math.random() * characters.length));
             }
-            const expiryTime = new Date().getTime() + 48 * 60 * 60 * 1000; // 48 hours expiry
-            const expiryDate = new Date(expiryTime).toLocaleString();
-            document.getElementById('key').innerText = key;
-            document.getElementById('expiry').innerText = `Expires at: ${expiryDate}`;
+            const expiryTime = currentTime + 48 * 60 * 60 * 1000; // 48 hours expiry
             localStorage.setItem('generatedKey', key);
             localStorage.setItem('keyExpiry', expiryTime);
+
+            document.getElementById('key').innerText = key;
+            document.getElementById('expiry').innerText = `Expires in: ${formatTime(expiryTime - currentTime)}`;
+            document.getElementById('generate-btn').disabled = true;
         }
-        
-        // Validate key on page load
-        window.onload = function() {
-            const storedKey = localStorage.getItem('generatedKey');
-            const storedExpiry = localStorage.getItem('keyExpiry');
-            if (storedKey && storedExpiry) {
-                const currentTime = new Date().getTime();
-                if (currentTime > storedExpiry) {
-                    document.getElementById('key').innerText = "Expired";
-                    document.getElementById('expiry').innerText = "This key has expired.";
-                } else {
-                    document.getElementById('key').innerText = storedKey;
-                    document.getElementById('expiry').innerText = `Expires at: ${new Date(storedExpiry).toLocaleString()}`;
-                }
-            }
-        };
+
+        // Load the key when the page loads
+        window.onload = loadKey;
     </script>
 </body>
 </html>
