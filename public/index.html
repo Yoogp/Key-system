@@ -1,136 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Key System - Complete Offer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body { 
-      font-family: 'Roboto', sans-serif; 
-      background: #f0f0f5; 
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      text-align: center;
-      background: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 500px;
-    }
-    h1 { font-size: 2.5rem; color: #333; margin-bottom: 20px; }
-    button {
-      background-color: #28a745;
-      border: none;
-      color: white;
-      font-size: 1.2rem;
-      padding: 15px 30px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-    }
-    button:hover { background-color: #218838; }
-    #key-container { 
-      display: none; 
-      margin-top: 30px; 
-    }
-    .key { font-size: 2rem; font-weight: 600; color: #007bff; }
-    .timer { font-size: 1.2rem; color: #dc3545; margin-top: 10px; }
-    .linkvertise-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .linkvertise-text {
-      margin-top: 20px;
-      font-size: 1.1rem;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Key System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            animation: fadeIn 2s ease;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: slideDown 1.5s ease;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            animation: fadeIn 2.5s ease;
+        }
+        .btn {
+            display: inline-block;
+            background: #1bc6c7;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: popUp 2s ease;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes popUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Complete the Linkvertise Offer</h1>
-    <p>To receive your key, click below and complete the offer.</p>
-    
-    <!-- Linkvertise button -->
-    <button id="linkvertise-btn" onclick="startLinkvertise()">Complete Linkvertise Offer</button>
-
-    <!-- Linkvertise info -->
-    <div class="linkvertise-container" id="linkvertise-info" style="display:none;">
-      <p class="linkvertise-text">You will be redirected to a Linkvertise offer. Complete it and return here.</p>
+    <div class="container">
+        <h1>Welcome to the Key System</h1>
+        <p>Generate your access key and unlock amazing possibilities!</p>
+        <a href="/key-generation" class="btn">Generate a Key</a>
     </div>
-
-    <!-- Key and timer -->
-    <div id="key-container">
-      <p class="key" id="key-display"></p>
-      <p class="timer" id="timer-display"></p>
-    </div>
-  </div>
-
-  <script>
-    let keyData = null;
-    let timerInterval = null;
-
-    // Start Linkvertise flow
-    function startLinkvertise() {
-      // Simulate the redirection process (you would redirect to Linkvertise here)
-      window.open("https://loot-link.com/s?Ze0R6d3B", "_blank");
-
-      // Show info about the process
-      document.getElementById('linkvertise-info').style.display = "block";
-      document.getElementById('linkvertise-btn').disabled = true;
-
-      // Simulate a delay as if the user completed the task and returned
-      setTimeout(generateKey, 5000); // Simulate a 5-second delay (replace with actual verification process)
-    }
-
-    // Generate a key after returning from Linkvertise
-    async function generateKey() {
-      const response = await fetch('/generateKey');
-      const data = await response.json();
-
-      keyData = data;
-      document.getElementById('key-display').textContent = `Key: ${keyData.key}`;
-      document.getElementById('timer-display').textContent = formatTimeLeft(keyData.expiryTime - Date.now());
-
-      // Show the key and start the timer
-      document.getElementById('key-container').style.display = 'block';
-      startTimer();
-
-      // Disable the "Complete Linkvertise Offer" button until the key expires
-      document.getElementById('linkvertise-btn').disabled = true;
-    }
-
-    // Start the countdown timer
-    function startTimer() {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        const timeLeft = keyData.expiryTime - Date.now();
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('timer-display').textContent = 'Key Expired!';
-        } else {
-          document.getElementById('timer-display').textContent = formatTimeLeft(timeLeft);
-        }
-      }, 1000);
-    }
-
-    // Format the time left in HH:MM:SS format
-    function formatTimeLeft(ms) {
-      const hours = Math.floor(ms / 3600000);
-      const minutes = Math.floor((ms % 3600000) / 60000);
-      const seconds = Math.floor((ms % 60000) / 1000);
-      return `${hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-    }
-  </script>
 </body>
 </html>
