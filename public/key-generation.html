@@ -6,144 +6,53 @@
     <title>Key Generation</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #1e3c72, #2a5298);
-            color: white;
+            font-family: Arial, sans-serif;
             text-align: center;
-            overflow: hidden;
+            padding: 20px;
         }
         .container {
-            margin-top: 15%;
-            animation: zoomIn 1.5s ease;
+            margin: 50px auto;
+            max-width: 600px;
         }
-        h1 {
-            font-size: 3rem;
-            animation: fadeIn 1.5s ease;
-        }
-        .key-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            margin: 20px auto;
+        .btn {
             display: inline-block;
-            border-radius: 12px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 2s ease;
-        }
-        .key {
-            font-size: 1.8rem;
-            color: #00e676;
-            font-weight: bold;
-        }
-        .expiry {
-            font-size: 1.2rem;
-            color: #ffcc00;
-        }
-        button {
-            background: linear-gradient(45deg, #ff6f00, #ff8f00);
-            color: white;
-            border: none;
             padding: 10px 20px;
-            font-size: 1.2rem;
             margin-top: 20px;
-            border-radius: 8px;
+            font-size: 16px;
+            color: white;
+            background-color: green;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            animation: popUp 2.5s ease;
         }
-        button:hover {
-            transform: scale(1.1);
-            box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
+        .btn:hover {
+            background-color: darkgreen;
         }
-        button[disabled] {
-            background: gray;
-            cursor: not-allowed;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes zoomIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        @keyframes popUp {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        #key-container {
+            margin-top: 20px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Generate Your Key</h1>
-        <div class="key-box">
-            <p class="key">Generated Key: <span id="key">Loading...</span></p>
-            <p class="expiry">Expires In: <span id="expiry">Loading...</span></p>
+        <button id="generate-btn" class="btn">Generate Key</button>
+        <div id="key-container">
+            <p id="key-display"></p>
+            <p id="expiry-display"></p>
         </div>
-        <button id="generate-btn" onclick="generateKey()">Generate New Key</button>
     </div>
+
     <script>
-        function formatTime(ms) {
-            const hours = Math.floor(ms / 3600000);
-            const minutes = Math.floor((ms % 3600000) / 60000);
-            const seconds = Math.floor((ms % 60000) / 1000);
-            return `${hours}h ${minutes}m ${seconds}s`;
-        }
+        document.getElementById("generate-btn").addEventListener("click", async () => {
+            const response = await fetch("/api/generate-key", { method: "POST" });
+            const data = await response.json();
 
-        function loadKey() {
-            const storedKey = localStorage.getItem('generatedKey');
-            const storedExpiry = localStorage.getItem('keyExpiry');
-            const currentTime = new Date().getTime();
-
-            if (storedKey && storedExpiry) {
-                if (currentTime > storedExpiry) {
-                    // Key has expired
-                    localStorage.removeItem('generatedKey');
-                    localStorage.removeItem('keyExpiry');
-                    document.getElementById('key').innerText = "No active key.";
-                    document.getElementById('expiry').innerText = "Generate a new key.";
-                    document.getElementById('generate-btn').disabled = false;
-                } else {
-                    // Key is still valid
-                    document.getElementById('key').innerText = storedKey;
-                    document.getElementById('expiry').innerText = `Expires in: ${formatTime(storedExpiry - currentTime)}`;
-                    document.getElementById('generate-btn').disabled = true;
-                }
-            } else {
-                // No key stored
-                document.getElementById('key').innerText = "No active key.";
-                document.getElementById('expiry').innerText = "Generate a new key.";
-                document.getElementById('generate-btn').disabled = false;
-            }
-        }
-
-        function generateKey() {
-            const storedKey = localStorage.getItem('generatedKey');
-            const storedExpiry = localStorage.getItem('keyExpiry');
-            const currentTime = new Date().getTime();
-
-            if (storedKey && storedExpiry && currentTime <= storedExpiry) {
-                alert("You already have an active key. Wait until it expires before generating a new one.");
-                return;
-            }
-
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let key = '';
-            for (let i = 0; i < 12; i++) {
-                key += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            const expiryTime = currentTime + 48 * 60 * 60 * 1000; // 48 hours expiry
-            localStorage.setItem('generatedKey', key);
-            localStorage.setItem('keyExpiry', expiryTime);
-
-            document.getElementById('key').innerText = key;
-            document.getElementById('expiry').innerText = `Expires in: ${formatTime(expiryTime - currentTime)}`;
-            document.getElementById('generate-btn').disabled = true;
-        }
-
-        // Load the key when the page loads
-        window.onload = loadKey;
+            document.getElementById("key-display").textContent = `Your Key: ${data.key}`;
+            const expiryDate = new Date(data.expiry).toLocaleString();
+            document.getElementById("expiry-display").textContent = `Expires: ${expiryDate}`;
+        });
     </script>
 </body>
 </html>
